@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>Teste Youtube</title>
+    <style type="text/css">
+    	input[type="text"] {
+		  width: 100%;
+		}
+        
+        .page-link {
+            position: relative;
+            display: block;
+            padding: .5rem .75rem;
+            margin-left: -1px;
+            line-height: 1.25;
+            color: #000000;
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+        }
+        
+        .page-link:hover {
+            color: #212529;
+            text-decoration: none;
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
+        
+        .btn-primary {
+            color: #fff;
+            background-color: #ff2c00;
+            border-color: #440202;
+        }
+        
+        .btn-primary:hover {
+            color: #fff;
+            background-color: #b10000;
+            border-color: #000000;
+        }
+        
+        .btn-primary:not(:disabled):not(.disabled).active, .btn-primary:not(:disabled):not(.disabled):active, .show>.btn-primary.dropdown-toggle {
+            color: #fff;
+            background-color: #b90000;
+            border-color: #000000;
+        }
+        
+        .borda
+        {
+            border: 2px solid #e44141;
+            padding-top: 6px;
+
+            color: #7d7878;  
+        }
+        
+        .btn-secondary {
+            color: #000;
+            background-color: #ffffff;
+            border-color: #6c757d;
+        }
+        
+
+    </style>
+    <script type="text/javascript">
+        
+        //VERIFICA SE HÁ MUDANÇAS NO JSON
+        function getURL(){
+            for (var i = 1; i <= 4; i++) {
+                responseUrl(i);
+                responseStatus(i);
+            }
+            //responseUrl(1);
+            //responseStatus(1);
+        }
+        
+        //Pega a URL DO VIDEO E A COLOCA NA TABELA 
+        function responseUrl(mini_pc){
+            var date = new Date();
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function()
+            {
+                
+                if (this.readyState == 4 && this.status == 200) 
+                {
+                     var response = JSON.parse(xhttp.responseText);
+                     //console.log(response.url);
+                     document.getElementById("miniPC"+ mini_pc +"_url").innerHTML = response.url;
+                     //document.getElementById("miniPC"+ mini_pc +"_status").innerHTML = response.status;
+                     
+                }
+            };
+           // xhttp.open("GET", "ajax/youtube_"+mini_pc+".json?"+ date.getMilliseconds() +"="+cache, false);
+            xhttp.open("GET", "http://localhost/youtubecontroller/ajax/youtube_"+mini_pc+".json?"+ date.getMilliseconds() +"="+cache, false);
+            xhttp.send();
+        }
+        
+        //MUDA O STATUS DA TABELA 
+         function responseStatus(mini_pc){
+            var date = new Date();
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function()
+            {
+                
+                if (this.readyState == 4 && this.status == 200) 
+                {
+                    var response = JSON.parse(xhttp.responseText);
+                    
+                    if(response.status == "play")
+                    {
+                        document.getElementById("miniPC"+ mini_pc +"_status").innerHTML = "Tocando";
+                    }else
+                    if(response.status == "pause")
+                    {
+                        document.getElementById("miniPC"+ mini_pc +"_status").innerHTML = "Pausado";
+                    }
+                }
+            };
+
+			xhttp.open("GET", "ajax/controle_"+ mini_pc +".json?"+ date.getMilliseconds() +"="+cache, false);
+
+            xhttp.send();
+        }
+        
+        
+        cache = 0;
+
+        //FUNÇÃO PARA VERIFICAR QUAL MINI PC ESTÁ SENDO ESCOLHIDO NA CHECKBOX
+        function statusMiniPC() 
+        {
+            for(var i = 1 ; i<=4;i++){
+                if(document.getElementById("miniPC"+i).checked == true){
+                   return i;
+                }
+            }
+         }   
+
+         //DEFINE O STATUS REFERENTE AO AMINO ESCOLHIDO
+         function pegaStatus()
+         {
+
+            var date = new Date();
+            var seconds = date.getMilliseconds();
+            cache++;    
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function()
+            {
+                if (this.readyState == 4 && this.status == 200) 
+                {                   
+                    var response = JSON.parse(xhttp.responseText);
+
+
+
+                            console.log(response.status);
+                            if(response.status == "play"){
+                                document.getElementById("t").innerHTML = "Pause";
+                                document.getElementById("img_gif").src = "img/media-pause-2x.png";
+                                document.getElementById("img_gif").style = "padding-left:10px;";
+                                document.getElementById("link").href = "ajax/controle.asp?miniPC="+ statusMiniPC() +"&status=pause&step=empty";
+                                
+                            }
+
+                            if(response.status == "pause"){
+                                document.getElementById("t").innerHTML = "Play";
+                                document.getElementById("t").style = "margin-left:5px;";
+                                document.getElementById("img_gif").src = "img/media-play-2x.png";
+                                document.getElementById("img_gif").style = "padding-left:7px; padding-right: 15px;";
+                                document.getElementById("link").href = "ajax/controle.asp?miniPC="+ statusMiniPC() +"&status=play&step=empty";                          
+                               
+                            }
+                        
+                    }
+
+                };
+                 xhttp.open("GET", "ajax/controle_" + statusMiniPC() +".json?"+ seconds +"="+cache, false);
+                    xhttp.send();
+            }
+
+            
+            
+
+        
+        
+        //DEFINE SE AVANÇA OU RETROCEDE OS VIDEOS
+        function setStep(info)
+        {
+
+            document.getElementById(info).href = "ajax/controle.asp?miniPC="+ statusMiniPC()  +"&status=play&step="+info;
+        }
+        
+        
+        function validateForm()
+        {
+            var form = document.forms["form_url"]["url"].value;
+            
+            if(form == "")
+            {
+               
+                document.getElementById("url_youtube").required = "true";
+                //document.getElementById("alerta").style.display = "block";
+                return false;
+            }
+            
+            
+            console.log(form)
+            
+            
+        }
+
+        
+        window.setInterval("pegaStatus();getURL();",500);
+        
+    </script>
+    <style type="text/css">
+        .tamanho{
+            width: 30px;
+        }
+    </style>
+  </head>
+  <body onload="getURL();">
+    <div class = "container">
+        <div class="row">
+            <div class="col-md-6" style="padding:10px; margin-top: 33px;">
+                <img src="img/logo.png" class="img-fluid" width="170">
+            </div>
+        </div>
+    	<form method="get" name="form_url" action="ajax/video.asp" onsubmit="return validateForm()"  target="_blank" >
+            <div class="row" style="margin-top:28px;  margin-left: 0px;">
+               <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                  <label class="btn btn-secondary active btn-sm">
+                    <input type="radio" name="miniPC" id="miniPC1" value="1" autocomplete="off"  checked="true" > MiniPc
+                  </label>
+                 <label class="btn btn-secondary btn-sm">
+                    <input type="radio" name="miniPC" id="miniPC2"  value="2" autocomplete="off"> MiniPc 2
+                  </label>
+                  <label class="btn btn-secondary btn-sm">
+                    <input type="radio" name="miniPC" id="miniPC3"  value="3" autocomplete="off"> MiniPC 3
+                  </label>
+                   <label class="btn btn-secondary btn-sm">
+                    <input type="radio" name="miniPC" id="miniPC4"  value="4" autocomplete="off"> MiniPC 4
+                  </label>
+                </div> 
+            </div>
+	    	<div class = "row" style="margin-top: 2%;">
+		    	<div class="col-md-7" style="padding-top: 1px;">
+		    		<input id="url_youtube" type="text" name="url" style="font-size:13px;" placeholder="Digite a Url do Video ou Playlist ou Palavra-Chave">
+		    	</div>
+		    	<div class="col-md-2" style="">
+		    		<button type="submit" class="btn btn-primary btn-sm" style="font-size:13px;" onclick="validateForm();">Enviar</button>
+		    	</div>
+	    	</div>
+    	</form>
+        <hr>
+        <div class="row">
+            <div class="col-md-12">
+                <h4>Controles</h4>
+            </div>
+            <div class="row" style="padding-left:15px; padding-top:15px; font-size: 13px;">
+                <div class="col-md-3">
+                    <nav aria-label="Page navigation example">
+                      <ul class="pagination">
+                        <li id="teste" class="page-item"><a id="link" class="page-link" href='javascript:pegaStatus();' target="_blank"><img id="img_gif" style="padding-left:7px; padding-right: 15px;" src="img/media-play-2x.png"></span><span id ="t">Play</span></a></li>
+                        <li class="page-item"><a id="back" class="page-link" href='javascript:setStep("back");' onclick='setStep("back");' target="_blank"><img style="padding-left:15px;" src="img/media-step-backward-2x.png">Anterior</a></li>
+                        <li class="page-item"><a id="foward" class="page-link" href='javascript:setStep("foward");' onclick='setStep("foward");' target="_blank"><img style="padding-left:17px;" src="img/media-step-forward-2x.png">Próximo</a></li> 
+                      </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 22px; font-size: 13px; margin-left:-11px;">
+            <div class="col-md-12">
+                <h4>Dispositivos</h4>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 22px; font-size: 13px; margin-left:1px;">    
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th scope="col">MiniPC</th>
+                  <th scope="col">URL Vídeo| Playlist | Palavras-Chaves</th>
+                  <th scope="col">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="tamanho">MiniPC</td>
+                  <td id="miniPC1_url" class="tamanho" ></td>
+                  <td id="miniPC1_status" class="tamanho"></td>
+                </tr>
+                 <tr>
+                  <td class="tamanho">MiniPC 2</td>
+                  <td id="miniPC2_url" class="tamanho" ></td>
+                  <td id="miniPC2_status" class="tamanho"></td>
+                </tr>
+                 <tr>
+                  <td class="tamanho">MiniPC 3</td>
+                  <td id="miniPC3_url" class="tamanho" ></td>
+                  <td id="miniPC3_status" class="tamanho"></td>
+                </tr>
+                <tr>
+                  <td class="tamanho">MiniPC 4</td>
+                  <td id="miniPC4_url" class="tamanho" ></td>
+                  <td id="miniPC4_status" class="tamanho"></td>
+                </tr>
+                <!--<tr>
+                  <td>MiniPC 2</td>
+                  <td id="miniPC2_url" ></td>
+                  <td id="miniPC2_status"></td>
+                </tr>-->
+              </tbody>
+            </table>
+        </div>   	
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  </body>
+</html>
